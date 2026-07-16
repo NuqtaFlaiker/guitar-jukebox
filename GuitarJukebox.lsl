@@ -40,12 +40,15 @@ float   SIZE_STEP = 1.10;  // factor por pulsación (10 % más grande / pequeña
 float   SIZE_MIN  = 0.25;  // tamaño total mínimo respecto al original (25 %)
 float   SIZE_MAX  = 4.0;   // tamaño total máximo respecto al original (400 %)
 
-// Volumen base del reproductor (10–100), IGUAL PARA TODOS los oyentes: viaja
+// Volumen base del reproductor (1–10), IGUAL PARA TODOS los oyentes: viaja
 // en la URL de la media. OJO: la media MOAP apenas atenúa (o nada) con la
 // distancia según el viewer de cada uno, así que este volumen es la única
-// palanca real para que la guitarra no atrone en toda la sim. Empezamos bajo.
-integer VOLUME_DEFAULT = 15;
-integer VOLUME_STEP    = 5;
+// palanca real para que la guitarra no atrone en toda la sim. Por eso el
+// tope es un 10 % del volumen del navegador, ajustable de 1 en 1.
+integer VOLUME_DEFAULT = 5;
+integer VOLUME_MIN     = 1;
+integer VOLUME_MAX     = 10;
+integer VOLUME_STEP    = 1;
 
 // Etiquetas de botones (cada una muy por debajo del límite de 24 bytes).
 string BTN_PREV     = "« Ant";
@@ -262,7 +265,8 @@ showSize()
 
 showVol()
 {
-    openDialog("🔊 Volumen base: " + (string)gVolume + " % (igual para TODOS los oyentes).\n"
+    openDialog("🔊 Volumen base: " + (string)gVolume + " de " + (string)VOLUME_MAX
+        + " (igual para TODOS los oyentes).\n"
         + "La media MOAP apenas atenúa con la distancia: mantenlo bajo.\n"
         + "Cambiarlo con una canción sonando la reinicia desde el principio.",
         [BTN_BACK, BTN_VOL_DOWN, BTN_VOL_UP],
@@ -605,8 +609,8 @@ default
             integer v = gVolume;
             if (msg == BTN_VOL_UP)        v += VOLUME_STEP;
             else if (msg == BTN_VOL_DOWN) v -= VOLUME_STEP;
-            if (v < 5)   v = 5;    // 0 sería "no suena nada": mejor un suelo
-            if (v > 100) v = 100;
+            if (v < VOLUME_MIN) v = VOLUME_MIN; // 0 sería "no suena nada"
+            if (v > VOLUME_MAX) v = VOLUME_MAX;
             if (v != gVolume)
             {
                 gVolume = v;

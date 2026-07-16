@@ -113,12 +113,12 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
      editor: mover en pasos de 2 cm, rotar de 15° en 15°, agrandar/encoger
      un 10 % por pulsación (límites 25 %–400 % del tamaño original).
      Cada submenú tiene `Reset` para volver a como estaba al ponértela.
-   - `Volumen` — sube o baja el volumen base del reproductor (5–100 %),
+   - `Volumen` — sube o baja el volumen base del reproductor, de 1 a 10
+     (que equivalen al 1–10 % del volumen del navegador; por defecto 5),
      **igual para todos los oyentes** (viaja en la URL de la media). Como la
-     media MOAP apenas atenúa con la distancia, este volumen es la única
-     palanca real para que la guitarra no suene fuerte en toda la sim:
-     mantenlo bajo (por defecto 15 %). Cambiarlo con una canción sonando la
-     reinicia desde el principio.
+     media MOAP apenas atenúa con la distancia, el tope está capado muy bajo
+     para que la guitarra no atrone en toda la sim. Cambiarlo con una
+     canción sonando la reinicia desde el principio.
    - `■ Detener` — para la música.
 2. Elige una canción → la cara del prim carga el reproductor y suena.
 
