@@ -93,7 +93,11 @@ if (!song) {
   idle('Canción no válida', 'Error');
 } else {
   var audio = new Audio('songs/' + song);
-  audio.volume = 0.8;
+  // Volumen base 0-100 desde la URL (?vol=). Bajarlo encoge la zona audible:
+  // el viewer ya atenúa por distancia, así el sonido "muere" mucho antes.
+  var vol = parseInt(qs.get('vol'), 10);
+  if (isNaN(vol)) vol = 80;
+  audio.volume = Math.min(100, Math.max(0, vol)) / 100;
   if (qs.get('loop') === '1') audio.loop = true;
 
   el('label').textContent = 'Ahora suena';

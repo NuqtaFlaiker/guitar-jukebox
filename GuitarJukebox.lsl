@@ -40,6 +40,12 @@ float   SIZE_STEP = 1.10;  // factor por pulsación (10 % más grande / pequeña
 float   SIZE_MIN  = 0.25;  // tamaño total mínimo respecto al original (25 %)
 float   SIZE_MAX  = 4.0;   // tamaño total máximo respecto al original (400 %)
 
+// Volumen base del reproductor (10–100). Bajarlo REDUCE LA ZONA en la que se
+// oye la guitarra: el viewer de cada oyente ya atenúa por distancia, así que
+// con menos volumen base el sonido se apaga mucho antes al alejarse.
+integer VOLUME_DEFAULT = 40;
+integer VOLUME_STEP    = 10;
+
 // Etiquetas de botones (cada una muy por debajo del límite de 24 bytes).
 string BTN_PREV     = "« Ant";
 string BTN_NEXT     = "Sig »";
@@ -56,6 +62,9 @@ string BTN_ANIM2    = "Anim 2";
 string BTN_ANIM_OFF = "Quitar anim";
 string BTN_BIGGER   = "+ Grande";
 string BTN_SMALLER  = "- Pequeña";
+string BTN_VOL      = "Volumen";
+string BTN_VOL_UP   = "Vol +";
+string BTN_VOL_DOWN = "Vol -";
 
 // Identificadores del menú activo (para saber qué significan los botones).
 integer MENU_MAIN  = 0;
@@ -64,6 +73,7 @@ integer MENU_ANIM  = 2;
 integer MENU_MOVE  = 3;
 integer MENU_ROT   = 4;
 integer MENU_SIZE  = 5;
+integer MENU_VOL   = 6;
 
 // ------------------------------ ESTADO INTERNO -----------------------------
 list    gTitles;      // títulos visibles           (lista paralela a gFiles)
@@ -82,6 +92,8 @@ integer gPendingSet;  // TRUE si gPendingAnim está pendiente
 vector  gHomePos;     // posición local original (para Reset de Mover)
 rotation gHomeRot;    // rotación local original (para Reset de Rotar)
 float   gSizeFactor;  // factor de tamaño acumulado respecto al original
+integer gVolume;      // volumen base actual (se inicia a VOLUME_DEFAULT)
+integer gNowPlaying = -1; // índice de la canción sonando (-1 = ninguna)
 
 // ------------------------------ UTILIDADES ---------------------------------
 
@@ -133,6 +145,7 @@ stopSong()
 {
     llClearPrimMedia(MEDIA_FACE);
     restoreScreen();
+    gNowPlaying = -1;
 }
 
 // Cierra el listener y apaga el timer del menú.
@@ -171,7 +184,8 @@ showMain()
 {
     openDialog("🎸 Jukebox — ¿qué hacemos?",
         [BTN_SONGS, BTN_ANIM, BTN_STOP,
-         BTN_MOVE, BTN_ROT, BTN_SIZE],
+         BTN_MOVE, BTN_ROT, BTN_SIZE,
+         BTN_VOL],
         MENU_MAIN);
 }
 
@@ -243,6 +257,15 @@ showSize()
         + "–" + (string)((integer)(SIZE_MAX * 100.0)) + " %).",
         [BTN_BACK, BTN_RESET, BTN_BIGGER, BTN_SMALLER],
         MENU_SIZE);
+}
+
+showVol()
+{
+    openDialog("🔊 Volumen base: " + (string)gVolume + " %.\n"
+        + "Bajarlo encoge la zona en la que se oye la guitarra.\n"
+        + "Cambiarlo con una canción sonando la reinicia desde el principio.",
+        [BTN_BACK, BTN_VOL_DOWN, BTN_VOL_UP],
+        MENU_VOL);
 }
 
 // ------------------------------ ANIMACIÓN ----------------------------------
@@ -356,7 +379,8 @@ playSong(integer idx)
     string title = llList2String(gTitles, idx);
 
     string url = BASE_URL + "/player.html?song=" + llEscapeURL(file)
-               + "&title=" + llEscapeURL(title);
+               + "&title=" + llEscapeURL(title)
+               + "&vol=" + (string)gVolume;
 
     // Límite de SL: la URL de media no puede superar 1024 bytes.
     // Tras llEscapeURL la cadena es ASCII puro, así que caracteres == bytes.
@@ -388,6 +412,7 @@ playSong(integer idx)
         PRIM_MEDIA_HEIGHT_PIXELS,  512
     ]);
     hideScreen();
+    gNowPlaying = idx;
     llOwnerSay("♪ Reproduciendo: " + title);
 }
 
@@ -402,6 +427,7 @@ default
         gChannel = 0x80000000 | (integer)("0x" + llGetSubString((string)llGetKey(), -8, -1));
         cleanup();
         captureHome();
+        gVolume = VOLUME_DEFAULT;
         // Si el script se reseteó con la cara oculta, el alpha guardado se
         // perdió: con HIDE_SCREEN la cara debe verse en reposo, así que la
         // dejamos opaca conservando su color.
@@ -495,6 +521,7 @@ default
             if (msg == BTN_MOVE)  { showMove();  return; }
             if (msg == BTN_ROT)   { showRot();   return; }
             if (msg == BTN_SIZE)  { showSize();  return; }
+            if (msg == BTN_VOL)   { showVol();   return; }
             if (msg == BTN_STOP)
             {
                 stopSong();
@@ -568,6 +595,25 @@ default
             else if (msg == "RotZ +") rotateStep(<0, 0, 1>,  1.0);
             else if (msg == "RotZ -") rotateStep(<0, 0, 1>, -1.0);
             showRot();
+            return;
+        }
+
+        // ---------------- volumen ----------------
+        if (menu == MENU_VOL)
+        {
+            integer v = gVolume;
+            if (msg == BTN_VOL_UP)        v += VOLUME_STEP;
+            else if (msg == BTN_VOL_DOWN) v -= VOLUME_STEP;
+            if (v < 10)  v = 10;   // 0 sería "no suena nada": mejor un suelo
+            if (v > 100) v = 100;
+            if (v != gVolume)
+            {
+                gVolume = v;
+                // El volumen viaja en la URL, así que para aplicarlo a la
+                // canción actual hay que relanzarla (empieza desde el inicio).
+                if (gNowPlaying >= 0) playSong(gNowPlaying);
+            }
+            showVol();
             return;
         }
 

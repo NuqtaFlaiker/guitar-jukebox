@@ -113,6 +113,11 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
      editor: mover en pasos de 2 cm, rotar de 15° en 15°, agrandar/encoger
      un 10 % por pulsación (límites 25 %–400 % del tamaño original).
      Cada submenú tiene `Reset` para volver a como estaba al ponértela.
+   - `Volumen` — sube o baja el volumen base del reproductor (10–100 %).
+     **Bajarlo encoge la zona en la que se oye la guitarra**: el viewer de
+     cada oyente atenúa por distancia, así que con menos volumen base el
+     sonido se apaga mucho antes al alejarse. Cambiarlo con una canción
+     sonando la reinicia desde el principio.
    - `■ Detener` — para la música.
 2. Elige una canción → la cara del prim carga el reproductor y suena.
 
