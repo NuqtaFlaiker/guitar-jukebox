@@ -67,9 +67,14 @@ nombre original como título visible.
    attachment normal (mano, cadera...), no como HUD.
 2. Botón derecho → **Editar** → pestaña **Contenido** → **Nuevo script**.
 3. Abre el script, borra el contenido y pega el de `GuitarJukebox.lsl`.
-4. Edita las dos primeras constantes:
+4. Edita las constantes de configuración:
    - `BASE_URL`: tu URL de GitHub Pages, **con https y sin barra final**.
    - `MEDIA_FACE`: número de la cara del prim que llevará la media.
+   - `HIDE_SCREEN`: con `TRUE` (por defecto) la cara se vuelve transparente
+     mientras suena y recupera su textura al detener, así la guitarra no
+     cambia de aspecto. Con `FALSE` se ve la pantalla del reproductor.
+     Ojo: con la pantalla oculta, si el navegador de un oyente bloquea el
+     autoplay no podrá pulsar el botón "Reproducir" de respaldo.
 5. Guarda el script.
 
 **¿Cómo saber el número de cara?** En la ventana de edición marca

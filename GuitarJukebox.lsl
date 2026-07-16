@@ -11,6 +11,13 @@
 // ------------------------------ CONFIGURACIÓN ------------------------------
 string  BASE_URL       = "https://nuqtaflaiker.github.io/guitar-jukebox"; // sin slash final
 integer MEDIA_FACE     = 0;    // cara del prim que llevará la media (ver README)
+
+// TRUE  = la cara se vuelve transparente mientras suena y recupera su aspecto
+//         al detener: la guitarra conserva su textura (los oyentes no verán el
+//         botón "Reproducir" de respaldo si su navegador bloquea el autoplay).
+// FALSE = comportamiento clásico: la pantalla del reproductor se ve en la cara.
+integer HIDE_SCREEN    = TRUE;
+
 float   DIALOG_TIMEOUT = 60.0; // segundos antes de cerrar el menú por inactividad
 
 // 9 canciones por página + 3 botones de navegación = 12 botones,
@@ -29,6 +36,9 @@ integer gPage;        // página actual del menú (base 0)
 integer gChannel;     // canal de diálogo (negativo, derivado de la key del objeto)
 integer gListen;      // handle del llListen activo (0 = ninguno)
 key     gReqId;       // id de la petición HTTP en curso
+integer gHidden;      // TRUE si la cara está oculta ahora mismo por HIDE_SCREEN
+vector  gSavedColor;  // color original de la cara (para restaurarlo)
+float   gSavedAlpha;  // alpha original de la cara (para restaurarlo)
 
 // ------------------------------ UTILIDADES ---------------------------------
 
@@ -51,6 +61,27 @@ string truncBytes(string s, integer maxBytes)
     while (utf8Bytes(s) > maxBytes)
         s = llGetSubString(s, 0, llStringLength(s) - 2);
     return s;
+}
+
+// Oculta la cara de la media (guardando su color/alpha original) para que la
+// pantalla del reproductor no tape la textura de la guitarra. El audio sigue
+// sonando: la media se carga igual aunque la cara sea transparente.
+hideScreen()
+{
+    if (!HIDE_SCREEN || gHidden) return;
+    list c = llGetPrimitiveParams([PRIM_COLOR, MEDIA_FACE]);
+    gSavedColor = llList2Vector(c, 0);
+    gSavedAlpha = llList2Float(c, 1);
+    llSetPrimitiveParams([PRIM_COLOR, MEDIA_FACE, gSavedColor, 0.0]);
+    gHidden = TRUE;
+}
+
+// Devuelve a la cara su color/alpha original tras detener la reproducción.
+restoreScreen()
+{
+    if (!gHidden) return;
+    llSetPrimitiveParams([PRIM_COLOR, MEDIA_FACE, gSavedColor, gSavedAlpha]);
+    gHidden = FALSE;
 }
 
 // Cierra el listener y apaga el timer del menú.
@@ -137,6 +168,7 @@ playSong(integer idx)
         PRIM_MEDIA_WIDTH_PIXELS,   512,
         PRIM_MEDIA_HEIGHT_PIXELS,  512
     ]);
+    hideScreen();
     llOwnerSay("♪ Reproduciendo: " + title);
 }
 
@@ -150,6 +182,15 @@ default
         // bit de signo. Evita colisiones con otros objetos con diálogos.
         gChannel = 0x80000000 | (integer)("0x" + llGetSubString((string)llGetKey(), -8, -1));
         cleanup();
+        // Si el script se reseteó con la cara oculta, el alpha guardado se
+        // perdió: con HIDE_SCREEN la cara debe verse en reposo, así que la
+        // dejamos opaca conservando su color.
+        if (HIDE_SCREEN)
+        {
+            list c = llGetPrimitiveParams([PRIM_COLOR, MEDIA_FACE]);
+            if (llList2Float(c, 1) == 0.0)
+                llSetPrimitiveParams([PRIM_COLOR, MEDIA_FACE, llList2Vector(c, 0), 1.0]);
+        }
         llOwnerSay("Jukebox listo. Tócame para elegir canción.");
     }
 
@@ -229,6 +270,7 @@ default
         {
             // llClearPrimMedia también duerme el script 1.0 s.
             llClearPrimMedia(MEDIA_FACE);
+            restoreScreen();
             llOwnerSay("■ Reproducción detenida.");
             return;
         }
