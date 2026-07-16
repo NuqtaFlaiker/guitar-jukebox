@@ -101,11 +101,20 @@ el menú ya trae las canciones nuevas.
 del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
 (la tapa trasera o la boca de la guitarra quedan bien).
 
-## 4. Probar
+## 4. Usar
 
-1. Toca la guitarra → aparece el menú con las canciones.
-2. Usa `« Ant` / `Sig »` para cambiar de página y `■ Detener` para parar.
-3. Elige una canción → la cara del prim carga el reproductor y suena.
+1. Toca la guitarra → aparece el **menú principal**:
+   - `♪ Canciones` — descarga el catálogo y muestra la lista paginada
+     (`« Ant` / `Sig »` para cambiar de página, `« Menú` para volver).
+   - `Animación` — reproduce la animación **"1"** o **"2"** mientras tocas,
+     o `Quitar anim` para pararla. Las animaciones deben estar **dentro del
+     Contenido de la guitarra** con esos nombres exactos.
+   - `Mover` / `Rotar` / `Tamaño` — ajusta la guitarra puesta sin abrir el
+     editor: mover en pasos de 2 cm, rotar de 15° en 15°, agrandar/encoger
+     un 10 % por pulsación (límites 25 %–400 % del tamaño original).
+     Cada submenú tiene `Reset` para volver a como estaba al ponértela.
+   - `■ Detener` — para la música.
+2. Elige una canción → la cara del prim carga el reproductor y suena.
 
 ### Si algo falla
 
