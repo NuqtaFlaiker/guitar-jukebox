@@ -9,7 +9,7 @@
 // ============================================================================
 
 // ------------------------------ CONFIGURACIÓN ------------------------------
-string  BASE_URL       = "https://rcg-mods.github.io/guitar-jukebox"; // sin slash final
+string  BASE_URL       = "https://nuqtaflaiker.github.io/guitar-jukebox"; // sin slash final
 integer MEDIA_FACE     = 0;    // cara del prim que llevará la media (ver README)
 float   DIALOG_TIMEOUT = 60.0; // segundos antes de cerrar el menú por inactividad
 
