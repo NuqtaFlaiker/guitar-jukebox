@@ -1,5 +1,6 @@
 # Catálogo generado por tools/normalize.sh el 2026-07-16
 # Formato: Título visible|archivo.mp3
 
+Your Sweet Six Six Six|your-sweet-six-six-six.mp3
 Buckethead - Soothsayer|buckethead-soothsayer.mp3
 I Really Want to Stay at Your House|i-really-want-to-stay-at-your-house-cyberpunk-edgerunners2077-cover.mp3
