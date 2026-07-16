@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guitarra · Jukebox</title>
+<style>
+:root{
+  --rosewood:#2B1B12;
+  --spruce:#E8D9BE;
+  --brass:#C9973F;
+  --shadow:#17100A;
+  --muted:#8A7460;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:radial-gradient(circle at 50% 42%, #3a2618 0%, var(--rosewood) 55%, var(--shadow) 100%);
+  color:var(--spruce);
+  font-family:system-ui,sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:4vmin;padding:5vmin;overflow:hidden;
+}
+.label{
+  font-size:3.4vmin;letter-spacing:.35em;text-transform:uppercase;
+  color:var(--muted);
+}
+#title{
+  font-family:Georgia,'Times New Roman',serif;
+  font-weight:normal;
+  font-size:9.5vmin;line-height:1.15;
+  max-width:92vw;overflow-wrap:break-word;
+  text-shadow:0 2px 8px var(--shadow);
+}
+body.playing #title{color:var(--brass)}
+#strings{width:86vw;max-width:640px}
+.s{
+  height:2px;background:var(--muted);margin:2.8vmin 0;border-radius:1px;
+}
+body.playing .s{
+  background:var(--brass);
+  box-shadow:0 0 6px rgba(201,151,63,.55);
+  animation:vib ease-in-out infinite alternate;
+}
+@keyframes vib{
+  from{transform:translateY(calc(var(--a) * -1))}
+  to{transform:translateY(var(--a))}
+}
+.s:nth-child(1){--a:0.8px;animation-duration:.10s}
+.s:nth-child(2){--a:1.1px;animation-duration:.12s}
+.s:nth-child(3){--a:1.4px;animation-duration:.14s}
+.s:nth-child(4){--a:1.7px;animation-duration:.16s}
+.s:nth-child(5){--a:2.1px;animation-duration:.19s}
+.s:nth-child(6){--a:2.5px;animation-duration:.22s}
+@media (prefers-reduced-motion:reduce){
+  body.playing .s{animation:none}
+}
+#playbtn{
+  display:none;position:fixed;inset:0;width:100%;height:100%;
+  background:rgba(23,16,10,.9);border:none;cursor:pointer;
+  color:var(--brass);font-family:Georgia,'Times New Roman',serif;font-size:13vmin;
+}
+body.blocked #playbtn{display:block}
+</style>
+</head>
+<body>
+<div class="label" id="label">Guitarra · Jukebox</div>
+<h1 id="title">En silencio</h1>
+<div id="strings">
+  <div class="s"></div><div class="s"></div><div class="s"></div>
+  <div class="s"></div><div class="s"></div><div class="s"></div>
+</div>
+<button id="playbtn">▶ Reproducir</button>
+<script>
+// URLSearchParams ya aplica decodeURIComponent a cada parámetro.
+var qs    = new URLSearchParams(location.search);
+var song  = (qs.get('song')  || '').trim();
+var title = (qs.get('title') || '').trim();
+
+function el(id){ return document.getElementById(id); }
+
+function idle(msg, label){
+  document.body.className = '';
+  el('label').textContent = label || 'Guitarra · Jukebox';
+  el('title').textContent = msg   || 'En silencio';
+}
+
+if (!song) {
+  // Sin parámetro song: estado de reposo.
+  idle();
+} else if (!/^[a-z0-9._-]+$/.test(song)) {
+  // Solo se aceptan nombres de archivo URL-safe; cualquier otra cosa es error.
+  idle('Canción no válida', 'Error');
+} else {
+  var audio = new Audio('songs/' + song);
+  audio.volume = 0.8;
+  if (qs.get('loop') === '1') audio.loop = true;
+
+  el('label').textContent = 'Ahora suena';
+  el('title').textContent = title || song;
+
+  audio.addEventListener('playing', function(){ document.body.classList.add('playing'); });
+  audio.addEventListener('pause',   function(){ document.body.classList.remove('playing'); });
+  audio.addEventListener('ended',   function(){ idle(); });
+  audio.addEventListener('error',   function(){ idle('No se pudo cargar el audio', 'Error'); });
+
+  function tryPlay(){
+    audio.play().then(function(){
+      document.body.classList.remove('blocked');
+    }).catch(function(){
+      // Autoplay bloqueado por el navegador: fallback con botón a pantalla completa.
+      document.body.classList.add('blocked');
+    });
+  }
+  el('playbtn').addEventListener('click', tryPlay);
+  tryPlay();
+}
+</script>
+</body>
+</html>
