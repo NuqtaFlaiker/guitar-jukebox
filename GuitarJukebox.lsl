@@ -166,7 +166,14 @@ playSong(integer idx)
         return;
     }
 
-    // Nota: llSetPrimMediaParams duerme el script 1.0 s; es normal.
+    // Destruir la media anterior antes de poner la nueva: si un viewer ya
+    // interactuó con la media (p.ej. pinchó el link flotante), deja de seguir
+    // los cambios de URL del script y pide clic cada vez. Al limpiar primero,
+    // cada canción llega como media nueva y carga sola para todos.
+    llClearPrimMedia(MEDIA_FACE);
+
+    // Nota: llSetPrimMediaParams (y llClearPrimMedia) duermen el script
+    // 1.0 s cada una; el pequeño retardo al elegir canción es normal.
     llSetPrimMediaParams(MEDIA_FACE, [
         PRIM_MEDIA_CURRENT_URL,    url,
         PRIM_MEDIA_HOME_URL,       url,
