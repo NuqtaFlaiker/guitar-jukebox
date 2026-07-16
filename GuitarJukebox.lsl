@@ -13,10 +13,13 @@ string  BASE_URL       = "https://nuqtaflaiker.github.io/guitar-jukebox"; // sin
 integer MEDIA_FACE     = 0;    // cara del prim que llevará la media (ver README)
 
 // TRUE  = la cara se vuelve transparente mientras suena y recupera su aspecto
-//         al detener: la guitarra conserva su textura (los oyentes no verán el
-//         botón "Reproducir" de respaldo si su navegador bloquea el autoplay).
-// FALSE = comportamiento clásico: la pantalla del reproductor se ve en la cara.
-integer HIDE_SCREEN    = TRUE;
+//         al detener. ¡OJO! Con la cara transparente el visor puede NO cargar
+//         la media (prioriza por área visible) y nadie puede pulsar el botón
+//         "Reproducir" de respaldo: solo queda la barrita de media de arriba.
+//         Úsalo únicamente si MEDIA_FACE es una pantallita pequeña que no
+//         forma parte del cuerpo de la guitarra.
+// FALSE = (recomendado) la pantalla del reproductor se ve en la cara.
+integer HIDE_SCREEN    = FALSE;
 
 float   DIALOG_TIMEOUT = 60.0; // segundos antes de cerrar el menú por inactividad
 
