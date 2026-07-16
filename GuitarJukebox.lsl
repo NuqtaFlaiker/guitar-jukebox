@@ -9,7 +9,7 @@
 // ============================================================================
 
 // ------------------------------ CONFIGURACIÓN ------------------------------
-string  BASE_URL       = "https://TU-USUARIO.github.io/TU-REPO"; // sin slash final
+string  BASE_URL       = "https://rcg-mods.github.io/guitar-jukebox"; // sin slash final
 integer MEDIA_FACE     = 0;    // cara del prim que llevará la media (ver README)
 float   DIALOG_TIMEOUT = 60.0; // segundos antes de cerrar el menú por inactividad
 
@@ -130,7 +130,9 @@ playSong(integer idx)
         PRIM_MEDIA_HOME_URL,       url,
         PRIM_MEDIA_AUTO_PLAY,      TRUE,
         PRIM_MEDIA_AUTO_SCALE,     TRUE,
-        PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_OWNER,
+        // INTERACT en ANYONE: si el navegador de un oyente bloquea el autoplay,
+        // podrá pulsar el botón "Reproducir" de respaldo de player.html.
+        PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_ANYONE,
         PRIM_MEDIA_PERMS_CONTROL,  PRIM_MEDIA_PERM_OWNER,
         PRIM_MEDIA_WIDTH_PIXELS,   512,
         PRIM_MEDIA_HEIGHT_PIXELS,  512
