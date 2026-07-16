@@ -16,6 +16,8 @@ según la canción que elijas en el menú.
 | `catalog.txt` | Catálogo de canciones (una por línea: `Título|archivo.mp3`) |
 | `GuitarJukebox.lsl` | Script LSL que va dentro de la guitarra |
 | `tools/normalize.sh` | (Opcional) Renombra MP3 a nombres seguros y regenera el catálogo |
+| `tools/subir.sh` | Sube las canciones nuevas de `songs/` en un solo paso (normaliza + push + verifica) |
+| `Subir canciones.cmd` | Doble clic en Windows para ejecutar `tools/subir.sh` |
 | `songs/` | Carpeta donde van tus MP3 |
 
 ## 1. Desplegar el servidor (GitHub Pages)
@@ -58,7 +60,19 @@ MP3 con su nombre "bonito" en `songs/` y ejecuta:
 ```
 
 Renombra los archivos a slugs seguros y regenera `catalog.txt` usando el
-nombre original como título visible.
+nombre original como título visible. Los títulos de canciones que ya estaban
+en el catálogo se conservan aunque los hayas editado a mano.
+
+### Añadir canciones nuevas (el día a día)
+
+1. Copia los MP3 nuevos a `songs/` (con el nombre "bonito" que quieras ver
+   en el menú, p. ej. `Hotel California.mp3`).
+2. Doble clic en **`Subir canciones.cmd`** (o ejecuta `./tools/subir.sh`).
+
+El script normaliza los archivos, regenera el catálogo, hace commit y push,
+y espera a que GitHub Pages publique para confirmarte que ya está en línea.
+No hay que tocar nada en Second Life: la próxima vez que toques la guitarra
+el menú ya trae las canciones nuevas.
 
 ## 3. En Second Life
 

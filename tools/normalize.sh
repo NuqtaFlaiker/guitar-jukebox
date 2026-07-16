@@ -8,6 +8,9 @@
 # El título visible del catálogo se toma del nombre de archivo ORIGINAL
 # (sin la extensión), así que nombra tus MP3 como quieras que se lean
 # en el menú, p.ej. "Canción del Mariachi.mp3".
+#
+# Los títulos de canciones que YA estaban en catalog.txt se conservan tal
+# cual (puedes editarlos a mano y no se pierden al volver a ejecutar esto).
 
 set -euo pipefail
 
@@ -33,6 +36,18 @@ slugify() {
         | sed -e 's/[^a-z0-9.]/-/g' -e 's/-\{2,\}/-/g' -e 's/^-//' -e 's/-$//'
 }
 
+# Títulos ya presentes en el catálogo actual: se conservan aunque el usuario
+# los haya editado a mano. Clave = nombre de archivo, valor = título.
+declare -A OLD_TITLES=()
+if [ -f "$CATALOG" ]; then
+    while IFS='|' read -r t f; do
+        t="$(printf '%s' "$t" | tr -d '\r')"
+        f="$(printf '%s' "$f" | tr -d '\r')"
+        case "$t" in ''|'#'*) continue ;; esac
+        [ -n "$f" ] && OLD_TITLES["$f"]="$t"
+    done < "$CATALOG"
+fi
+
 {
     echo "# Catálogo generado por tools/normalize.sh el $(date +%F)"
     echo "# Formato: Título visible|archivo.mp3"
@@ -53,6 +68,11 @@ for f in "$SONGS_DIR"/*.mp3; do
         fi
         mv "$f" "$SONGS_DIR/$slug"
         echo "renombrado: $base -> $slug"
+    fi
+
+    # Si la canción ya estaba catalogada, se respeta su título (editable a mano).
+    if [ -n "${OLD_TITLES[$slug]+x}" ]; then
+        title="${OLD_TITLES[$slug]}"
     fi
 
     # El separador del catálogo es '|': se elimina del título si apareciera.
