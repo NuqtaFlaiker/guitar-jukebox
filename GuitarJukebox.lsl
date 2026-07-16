@@ -40,11 +40,12 @@ float   SIZE_STEP = 1.10;  // factor por pulsación (10 % más grande / pequeña
 float   SIZE_MIN  = 0.25;  // tamaño total mínimo respecto al original (25 %)
 float   SIZE_MAX  = 4.0;   // tamaño total máximo respecto al original (400 %)
 
-// Volumen base del reproductor (10–100). Bajarlo REDUCE LA ZONA en la que se
-// oye la guitarra: el viewer de cada oyente ya atenúa por distancia, así que
-// con menos volumen base el sonido se apaga mucho antes al alejarse.
-integer VOLUME_DEFAULT = 40;
-integer VOLUME_STEP    = 10;
+// Volumen base del reproductor (10–100), IGUAL PARA TODOS los oyentes: viaja
+// en la URL de la media. OJO: la media MOAP apenas atenúa (o nada) con la
+// distancia según el viewer de cada uno, así que este volumen es la única
+// palanca real para que la guitarra no atrone en toda la sim. Empezamos bajo.
+integer VOLUME_DEFAULT = 15;
+integer VOLUME_STEP    = 5;
 
 // Etiquetas de botones (cada una muy por debajo del límite de 24 bytes).
 string BTN_PREV     = "« Ant";
@@ -261,8 +262,8 @@ showSize()
 
 showVol()
 {
-    openDialog("🔊 Volumen base: " + (string)gVolume + " %.\n"
-        + "Bajarlo encoge la zona en la que se oye la guitarra.\n"
+    openDialog("🔊 Volumen base: " + (string)gVolume + " % (igual para TODOS los oyentes).\n"
+        + "La media MOAP apenas atenúa con la distancia: mantenlo bajo.\n"
         + "Cambiarlo con una canción sonando la reinicia desde el principio.",
         [BTN_BACK, BTN_VOL_DOWN, BTN_VOL_UP],
         MENU_VOL);
@@ -604,7 +605,7 @@ default
             integer v = gVolume;
             if (msg == BTN_VOL_UP)        v += VOLUME_STEP;
             else if (msg == BTN_VOL_DOWN) v -= VOLUME_STEP;
-            if (v < 10)  v = 10;   // 0 sería "no suena nada": mejor un suelo
+            if (v < 5)   v = 5;    // 0 sería "no suena nada": mejor un suelo
             if (v > 100) v = 100;
             if (v != gVolume)
             {

@@ -113,11 +113,12 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
      editor: mover en pasos de 2 cm, rotar de 15° en 15°, agrandar/encoger
      un 10 % por pulsación (límites 25 %–400 % del tamaño original).
      Cada submenú tiene `Reset` para volver a como estaba al ponértela.
-   - `Volumen` — sube o baja el volumen base del reproductor (10–100 %).
-     **Bajarlo encoge la zona en la que se oye la guitarra**: el viewer de
-     cada oyente atenúa por distancia, así que con menos volumen base el
-     sonido se apaga mucho antes al alejarse. Cambiarlo con una canción
-     sonando la reinicia desde el principio.
+   - `Volumen` — sube o baja el volumen base del reproductor (5–100 %),
+     **igual para todos los oyentes** (viaja en la URL de la media). Como la
+     media MOAP apenas atenúa con la distancia, este volumen es la única
+     palanca real para que la guitarra no suene fuerte en toda la sim:
+     mantenlo bajo (por defecto 15 %). Cambiarlo con una canción sonando la
+     reinicia desde el principio.
    - `■ Detener` — para la música.
 2. Elige una canción → la cara del prim carga el reproductor y suena.
 
@@ -129,6 +130,7 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
 | Solo suena si pulso el link de la barra de media | `HIDE_SCREEN` en `TRUE` (cara transparente = media sin cargar y botón de respaldo inaccesible), o autoplay desactivado en el viewer (misma preferencia de arriba) |
 | La guitarra se vuelve transparente al reproducir | `HIDE_SCREEN` en `TRUE` con una `MEDIA_FACE` que es parte del cuerpo de la guitarra: ponlo en `FALSE` o elige una cara pequeña |
 | A otros no les suena la media de un attachment | En su viewer: **Preferencias → Sonido y multimedia → "Reproducir multimedia adjunta a otros avatares"** debe estar activada |
+| Se oye muy fuerte / en toda la sim | La MOAP apenas atenúa con la distancia (limitación del viewer, no del script). Baja el volumen base en el menú `Volumen`; ese cambio afecta a **todos** los oyentes |
 | El menú no aparece | `BASE_URL` mal escrita (debe empezar por `https://` y NO acabar en `/`) |
 | Faltan canciones del final | Catálogo > 16 KB: redúcelo o divídelo |
 | A los visitantes no les suena | La parcela bloquea media de objetos: es limitación del terreno, no un bug |
@@ -141,9 +143,12 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
   forzarla desde el objeto.
 - La reproducción **no está sincronizada** entre oyentes: cada viewer carga
   y reproduce por su cuenta.
-- El sonido es **zonal por diseño del viewer**: cada oyente oye la media más
-  fuerte cuanto más cerca esté de la guitarra, y de lejos ni se carga. Es
-  atenuación del viewer de cada uno; no se controla desde el script.
+- El sonido **NO es zonal**: la media MOAP apenas atenúa (o nada) con la
+  distancia, según los ajustes del viewer de cada oyente, así que puede oírse
+  en gran parte de la sim y al mismo volumen para todos. No hay forma de
+  limitarlo a la gente cercana desde el script; la única mitigación es el
+  volumen base del menú `Volumen` (bajo por defecto). Cada oyente puede
+  además silenciar la guitarra con su propio slider de media o bloqueándola.
 - Al **ponerte la guitarra** (o rezarla) siempre empieza **en silencio**,
   aunque te la quitaras con una canción sonando: el script limpia la media
   al vestirla.
