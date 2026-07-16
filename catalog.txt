@@ -1,34 +1,4 @@
-# Catálogo del jukebox — una canción por línea: Título visible|archivo.mp3
-# El separador es | (prohibido usarlo en títulos).
-# Los archivos deben existir en la carpeta songs/ con nombres URL-safe
-# (minúsculas, sin espacios ni acentos). Líneas vacías o con # se ignoran.
-#
-# Este catálogo es de EJEMPLO (25+ entradas para probar la paginación,
-# con tildes y ñ para probar el truncado de etiquetas). Sustitúyelo por el tuyo.
+# Catálogo generado por tools/normalize.sh el 2026-07-16
+# Formato: Título visible|archivo.mp3
 
-Hotel California|hotel-california.mp3
-Wish You Were Here|wish-you-were-here.mp3
-Tears in Heaven|tears-in-heaven.mp3
-Blackbird|blackbird.mp3
-Romance Anónimo|romance-anonimo.mp3
-Canción del Mariachi|cancion-del-mariachi.mp3
-El Cóndor Pasa|el-condor-pasa.mp3
-Lágrima|lagrima.mp3
-Recuerdos de la Alhambra|recuerdos-de-la-alhambra.mp3
-Asturias (Leyenda)|asturias-leyenda.mp3
-Entre Dos Aguas|entre-dos-aguas.mp3
-Mediterráneo|mediterraneo.mp3
-La Malagueña|la-malaguena.mp3
-Bésame Mucho|besame-mucho.mp3
-Cielito Lindo|cielito-lindo.mp3
-Stairway to Heaven|stairway-to-heaven.mp3
-Dust in the Wind|dust-in-the-wind.mp3
-More Than Words|more-than-words.mp3
-Nothing Else Matters|nothing-else-matters.mp3
-Angie|angie.mp3
-Redemption Song|redemption-song.mp3
-Wonderwall|wonderwall.mp3
-Hallelujah|hallelujah.mp3
-La Flaca|la-flaca.mp3
-Ojalá Que Llueva Café|ojala-que-llueva-cafe.mp3
-Y Nos Dieron las Diez|y-nos-dieron-las-diez.mp3
+Buckethead - Soothsayer|buckethead-soothsayer.mp3

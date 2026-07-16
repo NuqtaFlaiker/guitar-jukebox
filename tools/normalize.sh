@@ -20,12 +20,15 @@ if [ ! -d "$SONGS_DIR" ]; then
     exit 1
 fi
 
-# Convierte un nombre a slug URL-safe: translitera acentos a ASCII,
-# pasa a minúsculas, reemplaza todo lo que no sea [a-z0-9.-] por guiones
-# y colapsa guiones repetidos.
+# Convierte un nombre a slug URL-safe: translitera acentos a ASCII (si hay
+# iconv disponible; Git Bash en Windows no lo trae), pasa a minúsculas,
+# reemplaza todo lo que no sea [a-z0-9.] por guiones y colapsa repetidos.
 slugify() {
-    printf '%s' "$1" \
-        | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null \
+    local s="$1"
+    if command -v iconv >/dev/null 2>&1; then
+        s="$(printf '%s' "$s" | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null || printf '%s' "$s")"
+    fi
+    printf '%s' "$s" \
         | tr '[:upper:]' '[:lower:]' \
         | sed -e 's/[^a-z0-9.]/-/g' -e 's/-\{2,\}/-/g' -e 's/^-//' -e 's/-$//'
 }
