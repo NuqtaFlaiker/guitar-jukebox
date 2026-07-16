@@ -127,5 +127,11 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
   forzarla desde el objeto.
 - La reproducción **no está sincronizada** entre oyentes: cada viewer carga
   y reproduce por su cuenta.
+- El sonido es **zonal por diseño del viewer**: cada oyente oye la media más
+  fuerte cuanto más cerca esté de la guitarra, y de lejos ni se carga. Es
+  atenuación del viewer de cada uno; no se controla desde el script.
+- Al **ponerte la guitarra** (o rezarla) siempre empieza **en silencio**,
+  aunque te la quitaras con una canción sonando: el script limpia la media
+  al vestirla.
 - Que se oiga en mono o estéreo, y el volumen relativo, dependen del viewer
   de cada oyente.

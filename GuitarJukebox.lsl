@@ -87,6 +87,14 @@ restoreScreen()
     gHidden = FALSE;
 }
 
+// Detiene la reproducción: quita la media de la cara y restaura su aspecto.
+// Nota: llClearPrimMedia duerme el script 1.0 s; es normal.
+stopSong()
+{
+    llClearPrimMedia(MEDIA_FACE);
+    restoreScreen();
+}
+
 // Cierra el listener y apaga el timer del menú.
 cleanup()
 {
@@ -271,9 +279,7 @@ default
         }
         if (msg == BTN_STOP)
         {
-            // llClearPrimMedia también duerme el script 1.0 s.
-            llClearPrimMedia(MEDIA_FACE);
-            restoreScreen();
+            stopSong();
             llOwnerSay("■ Reproducción detenida.");
             return;
         }
@@ -321,10 +327,17 @@ default
     on_rez(integer param)
     {
         cleanup();
+        // La URL de media queda guardada en el prim: sin esto, al rezar la
+        // guitarra la última canción arrancaría sola. Siempre nace en silencio.
+        stopSong();
     }
 
     attach(key id)
     {
         cleanup();
+        // id != NULL_KEY = alguien acaba de PONERSE la guitarra (NULL_KEY es
+        // al quitársela). Limpia la media para que siempre empiece en silencio
+        // aunque se la quitara con una canción sonando.
+        if (id != NULL_KEY) stopSong();
     }
 }
