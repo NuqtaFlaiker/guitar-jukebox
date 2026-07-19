@@ -88,15 +88,17 @@ function idle(msg, label){
 if (!song) {
   // Sin parámetro song: estado de reposo.
   idle();
-} else if (!/^[a-z0-9._-]+$/.test(song)) {
-  // Solo se aceptan nombres de archivo URL-safe; cualquier otra cosa es error.
+} else if (song.indexOf('/') !== -1 || song.indexOf('\\') !== -1 || song.indexOf('..') !== -1) {
+  // Solo se bloquean rutas (traversal); mayúsculas, espacios o acentos en el
+  // nombre son válidos: encodeURIComponent los codifica al pedir el archivo.
   idle('Canción no válida', 'Error');
 } else {
-  var audio = new Audio('songs/' + song);
-  // Volumen base 0-100 desde la URL (?vol=). Bajarlo encoge la zona audible:
-  // el viewer ya atenúa por distancia, así el sonido "muere" mucho antes.
+  var audio = new Audio('songs/' + encodeURIComponent(song));
+  // Volumen base 0-100 desde la URL (?vol=). El script LSL envía 1-10 y si
+  // el parámetro faltara caemos a 5, el mismo VOLUME_DEFAULT del script:
+  // nunca atronar por accidente.
   var vol = parseInt(qs.get('vol'), 10);
-  if (isNaN(vol)) vol = 80;
+  if (isNaN(vol)) vol = 5;
   audio.volume = Math.min(100, Math.max(0, vol)) / 100;
   if (qs.get('loop') === '1') audio.loop = true;
 

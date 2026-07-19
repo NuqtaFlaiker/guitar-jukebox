@@ -37,9 +37,11 @@ según la canción que elijas en el menú.
 
 ## 2. Preparar las canciones
 
-- Los nombres de archivo deben ser "URL-safe": **minúsculas, sin espacios,
-  sin acentos ni ñ**, solo letras, números, puntos, guiones y guiones bajos.
+- Los nombres de archivo pueden llevar mayúsculas, espacios o acentos (el
+  reproductor los codifica solo), pero lo **recomendado** sigue siendo un
+  nombre "URL-safe": minúsculas, sin espacios, sin acentos ni ñ.
   Ejemplo: `Canción del Mariachi.mp3` → `cancion-del-mariachi.mp3`.
+  Lo único prohibido son barras (`/`, `\`) y `..` en el nombre.
 - El catálogo (`catalog.txt`) lleva una canción por línea con este formato
   (el separador es `|` y no puede aparecer en los títulos):
 
@@ -103,9 +105,13 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
 
 ## 4. Usar
 
-1. Toca la guitarra → aparece el **menú principal**:
+1. Toca la guitarra → aparece el **menú principal**. Si el toque no responde
+   (con una canción sonando, el clic sobre la cara de la media lo captura la
+   página web), escribe **`/1 menu`** en el chat: el menú se abre siempre.
    - `♪ Canciones` — descarga el catálogo y muestra la lista paginada
      (`« Ant` / `Sig »` para cambiar de página, `« Menú` para volver).
+     Cada botón va numerado (`1 Título`, `2 Título`...) para que dos títulos
+     parecidos nunca se confundan.
    - `Animación` — reproduce la animación **"1"** o **"2"** mientras tocas,
      o `Quitar anim` para pararla. Las animaciones deben estar **dentro del
      Contenido de la guitarra** con esos nombres exactos.
@@ -131,7 +137,9 @@ del 0 al 7 cambiando `MEDIA_FACE`. Elige una cara pequeña y discreta
 | La guitarra se vuelve transparente al reproducir | `HIDE_SCREEN` en `TRUE` con una `MEDIA_FACE` que es parte del cuerpo de la guitarra: ponlo en `FALSE` o elige una cara pequeña |
 | A otros no les suena la media de un attachment | En su viewer: **Preferencias → Sonido y multimedia → "Reproducir multimedia adjunta a otros avatares"** debe estar activada |
 | Se oye muy fuerte / en toda la sim | La MOAP apenas atenúa con la distancia (limitación del viewer, no del script). Baja el volumen base en el menú `Volumen`; ese cambio afecta a **todos** los oyentes |
+| El menú no aparece al tocar mientras suena música | El clic cae en la cara de la media y lo captura la página web: toca otra cara de la guitarra o escribe `/1 menu` en el chat |
 | El menú no aparece | `BASE_URL` mal escrita (debe empezar por `https://` y NO acabar en `/`) |
+| "El catálogo no responde" | GitHub Pages tarda o está caído, o `BASE_URL` apunta a un sitio que no existe; reintenta en un momento |
 | Faltan canciones del final | Catálogo > 16 KB: redúcelo o divídelo |
 | A los visitantes no les suena | La parcela bloquea media de objetos: es limitación del terreno, no un bug |
 | No funciona en absoluto | El objeto está puesto como HUD: MOAP no funciona en HUDs |

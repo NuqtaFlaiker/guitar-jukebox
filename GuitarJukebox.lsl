@@ -7,6 +7,10 @@
 //   Mover / Rotar / Tamaño — ajusta la guitarra puesta sin abrir el editor
 //   ■ Detener   — para la música
 //
+// Con una canción sonando, el clic sobre la cara de la media interactúa con
+// la página web y puede NO abrir el menú: escribe "/1 menu" en el chat para
+// abrirlo siempre.
+//
 // Recuerda: MOAP NO funciona en HUDs; usa la guitarra como attachment normal.
 // ============================================================================
 
@@ -24,6 +28,13 @@ integer MEDIA_FACE     = 0;    // cara del prim que llevará la media (ver READM
 integer HIDE_SCREEN    = FALSE;
 
 float   DIALOG_TIMEOUT = 60.0; // segundos antes de cerrar el menú por inactividad
+float   HTTP_TIMEOUT   = 15.0; // segundos de espera máxima por catalog.txt
+
+// Canal de chat de emergencia: mientras suena una canción, el clic sobre la
+// cara de la media lo captura la página web y no dispara el touch. Escribiendo
+// "/1 menu" en el chat local el menú se abre siempre (solo funciona al dueño).
+integer CHAT_CHANNEL = 1;
+string  CHAT_CMD     = "menu";
 
 // 9 canciones por página + 3 botones de navegación = 12 botones,
 // que es el MÁXIMO permitido por llDialog. No subir de 9.
@@ -97,7 +108,10 @@ vector  gHomePos;     // posición local original (para Reset de Mover)
 rotation gHomeRot;    // rotación local original (para Reset de Rotar)
 float   gSizeFactor;  // factor de tamaño acumulado respecto al original
 integer gVolume;      // volumen base actual (se inicia a VOLUME_DEFAULT)
-integer gNowPlaying = -1; // índice de la canción sonando (-1 = ninguna)
+string  gNowFile;     // archivo de la canción sonando ("" = ninguna)
+string  gNowTitle;    // título de la canción sonando
+integer gChatListen;  // handle del listener permanente de chat ("/1 menu")
+integer gHttpWait;    // TRUE mientras esperamos la descarga del catálogo
 
 // ------------------------------ UTILIDADES ---------------------------------
 
@@ -144,12 +158,16 @@ restoreScreen()
 }
 
 // Detiene la reproducción: quita la media de la cara y restaura su aspecto.
-// Nota: llClearPrimMedia duerme el script 1.0 s; es normal.
+// Nota: llClearPrimMedia duerme el script 1.0 s; es normal. Solo se llama si
+// de verdad hay media puesta: al vestirse la guitarra se disparan on_rez y
+// attach seguidos, y sin esta comprobación el script dormiría 2 s para nada.
 stopSong()
 {
-    llClearPrimMedia(MEDIA_FACE);
+    if (llGetPrimMediaParams(MEDIA_FACE, [PRIM_MEDIA_CURRENT_URL]) != [])
+        llClearPrimMedia(MEDIA_FACE);
     restoreScreen();
-    gNowPlaying = -1;
+    gNowFile  = "";
+    gNowTitle = "";
 }
 
 // Cierra el listener y apaga el timer del menú.
@@ -167,6 +185,7 @@ cleanup()
 openDialog(string text, list buttons, integer menu)
 {
     cleanup();
+    gHttpWait = FALSE; // abrir cualquier menú abandona la espera del catálogo
     gMenu   = menu;
     gListen = llListen(gChannel, "", llGetOwner(), ""); // solo escucha al dueño
     llSetTimerEvent(DIALOG_TIMEOUT);
@@ -179,6 +198,15 @@ captureHome()
     gHomePos    = llGetLocalPos();
     gHomeRot    = llGetLocalRot();
     gSizeFactor = 1.0;
+}
+
+// Etiqueta de botón de la canción i: número global + título, truncado a los
+// 24 bytes de llDialog. El número hace cada etiqueta única, así dos títulos
+// que truncaran igual (o uno idéntico a un botón de navegación) no pueden
+// mapearse a la canción equivocada.
+string songLabel(integer i)
+{
+    return truncBytes((string)(i + 1) + " " + llList2String(gTitles, i), 24);
 }
 
 // ------------------------------ MENÚS --------------------------------------
@@ -216,12 +244,7 @@ showSongs()
     list buttons = [BTN_PREV, BTN_BACK, BTN_NEXT];
     integer i;
     for (i = start; i <= end; ++i)
-    {
-        // Límite duro de llDialog: 24 BYTES por etiqueta (no caracteres).
-        string label = truncBytes(llList2String(gTitles, i), 24);
-        if (label == "") label = "♪ " + (string)(i + 1);
-        buttons += [label];
-    }
+        buttons += [songLabel(i)];
 
     // Mensaje del diálogo: límite de 511 bytes; este texto queda muy por debajo.
     openDialog("🎸 Jukebox — página " + (string)(gPage + 1) + " de " + (string)pages
@@ -377,12 +400,12 @@ rotateStep(vector axis, float sign)
 
 // ------------------------------ REPRODUCCIÓN -------------------------------
 
-// Reproduce la canción con índice global idx apuntando la media de la cara.
-playSong(integer idx)
+// Reproduce un archivo del catálogo apuntando la media de la cara. Se guarda
+// el archivo/título (y no un índice): si el catálogo se recarga con otra
+// lista, relanzar la canción actual (p. ej. al cambiar el volumen) sigue
+// sonando la misma y no la que ahora ocupe su posición.
+playFile(string file, string title)
 {
-    string file  = llList2String(gFiles, idx);
-    string title = llList2String(gTitles, idx);
-
     string url = BASE_URL + "/player.html?song=" + llEscapeURL(file)
                + "&title=" + llEscapeURL(title)
                + "&vol=" + (string)gVolume;
@@ -417,8 +440,15 @@ playSong(integer idx)
         PRIM_MEDIA_HEIGHT_PIXELS,  512
     ]);
     hideScreen();
-    gNowPlaying = idx;
+    gNowFile  = file;
+    gNowTitle = title;
     llOwnerSay("♪ Reproduciendo: " + title);
+}
+
+// Reproduce la canción con índice global idx de la lista actual.
+playSong(integer idx)
+{
+    playFile(llList2String(gFiles, idx), llList2String(gTitles, idx));
 }
 
 // ------------------------------ SCRIPT PRINCIPAL ---------------------------
@@ -442,10 +472,14 @@ default
             if (llList2Float(c, 1) == 0.0)
                 llSetPrimitiveParams([PRIM_COLOR, MEDIA_FACE, llList2Vector(c, 0), 1.0]);
         }
+        // Listener permanente del comando de chat "/1 menu" (solo el dueño):
+        // vía de escape cuando la media de la cara se traga los clics.
+        gChatListen = llListen(CHAT_CHANNEL, "", llGetOwner(), "");
         // En attachments los permisos de animación se conceden en silencio.
         if (llGetAttached())
             llRequestPermissions(llGetOwner(), PERMISSION_TRIGGER_ANIMATION);
-        llOwnerSay("Jukebox listo. Tócame para abrir el menú.");
+        llOwnerSay("Jukebox listo. Tócame para abrir el menú (o escribe /"
+            + (string)CHAT_CHANNEL + " " + CHAT_CMD + ").");
     }
 
     touch_start(integer num)
@@ -458,6 +492,8 @@ default
     http_response(key id, integer status, list meta, string body)
     {
         if (id != gReqId) return; // respuesta de otra petición, no nuestra
+        gHttpWait = FALSE;
+        llSetTimerEvent(0.0);
 
         if (status != 200)
         {
@@ -499,6 +535,15 @@ default
 
     listen(integer channel, string name, key id, string msg)
     {
+        // Comando de chat de emergencia: "/1 menu" abre el menú aunque la
+        // media de la cara esté capturando los clics.
+        if (channel == CHAT_CHANNEL)
+        {
+            if (llToLower(llStringTrim(msg, STRING_TRIM)) == CHAT_CMD)
+                showMain();
+            return;
+        }
+
         if (channel != gChannel) return;
         integer menu = gMenu;
         cleanup(); // cada respuesta consume el diálogo actual
@@ -519,7 +564,14 @@ default
                 gReqId = llHTTPRequest(BASE_URL + "/catalog.txt",
                     [HTTP_METHOD, "GET", HTTP_BODY_MAXLENGTH, 16384], "");
                 if (gReqId == NULL_KEY)
+                {
                     llOwnerSay("No se pudo lanzar la petición HTTP. Revisa BASE_URL en el script.");
+                    return;
+                }
+                // Si el servidor nunca responde, el timer avisa en vez de
+                // dejar al dueño esperando un menú que no va a llegar.
+                gHttpWait = TRUE;
+                llSetTimerEvent(HTTP_TIMEOUT);
                 return;
             }
             if (msg == BTN_ANIM)  { showAnim();  return; }
@@ -542,9 +594,9 @@ default
             if (msg == BTN_PREV) { --gPage; showSongs(); return; }
             if (msg == BTN_NEXT) { ++gPage; showSongs(); return; }
 
-            // Es una canción: mapear la etiqueta (posiblemente truncada) de
-            // vuelta al índice GLOBAL comparando contra el truncado de los
-            // títulos de la página actual. Nunca se busca el archivo por el
+            // Es una canción: mapear la etiqueta (numerada y posiblemente
+            // truncada) de vuelta al índice GLOBAL regenerándola para cada
+            // canción de la página actual. Nunca se busca el archivo por el
             // texto del botón.
             integer start = gPage * SONGS_PER_PAGE;
             integer end   = start + SONGS_PER_PAGE - 1;
@@ -553,9 +605,7 @@ default
             integer i;
             for (i = start; i <= end; ++i)
             {
-                string label = truncBytes(llList2String(gTitles, i), 24);
-                if (label == "") label = "♪ " + (string)(i + 1);
-                if (msg == label)
+                if (msg == songLabel(i))
                 {
                     playSong(i);
                     return;
@@ -616,7 +666,7 @@ default
                 gVolume = v;
                 // El volumen viaja en la URL, así que para aplicarlo a la
                 // canción actual hay que relanzarla (empieza desde el inicio).
-                if (gNowPlaying >= 0) playSong(gNowPlaying);
+                if (gNowFile != "") playFile(gNowFile, gNowTitle);
             }
             showVol();
             return;
@@ -648,6 +698,16 @@ default
 
     timer()
     {
+        if (gHttpWait)
+        {
+            // El catálogo no llegó a tiempo: avisar en vez de callar.
+            gHttpWait = FALSE;
+            gReqId    = NULL_KEY; // ignorar una respuesta tardía
+            llSetTimerEvent(0.0);
+            llOwnerSay("El catálogo no responde (¿BASE_URL correcta? ¿GitHub Pages caído?). "
+                + "Vuelve a intentarlo en un momento.");
+            return;
+        }
         // Menú caducado sin respuesta: cerrar listener para no gastar recursos.
         cleanup();
         llOwnerSay("Menú cerrado por inactividad.");
