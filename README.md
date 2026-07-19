@@ -86,8 +86,11 @@ el menú ya trae las canciones nuevas.
 4. Edita las constantes de configuración:
    - `BASE_URL`: tu URL de GitHub Pages, **con https y sin barra final**.
    - `MEDIA_FACE`: número de la cara del prim que llevará la media.
-   - `HIDE_SCREEN`: con `FALSE` (por defecto, recomendado) se ve la pantalla
-     del reproductor en la cara. Con `TRUE` la cara se vuelve transparente
+   - `HIDE_SCREEN`: con `FALSE` (por defecto, recomendado) la cara muestra la
+     página del reproductor, que es **totalmente blanca** (sin título ni
+     animación: solo un lienzo en blanco discreto; si el navegador bloquea el
+     autoplay, un clic en cualquier punto de la cara arranca la canción).
+     Con `TRUE` la cara se vuelve transparente
      mientras suena y recupera su textura al detener. **Ojo con `TRUE`**: si
      `MEDIA_FACE` es una cara grande del mesh, media guitarra se vuelve
      invisible; además el viewer puede no cargar la media de una cara
